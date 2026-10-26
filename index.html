@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova - College Event Registration</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            font-family: 'Outfit', sans-serif
+        }
+
+        body {
+            background: #f8f5ff;
+            overflow-x: hidden
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 40px rgba(120, 80, 200, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.6)
+        }
+
+        .glass-modal {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(32px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.2)
+        }
+
+        .glass-stat {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .glass-stat.dark {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border-color: rgba(0, 0, 0, 0.9)
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: 0.3s;
+            white-space: nowrap
+        }
+
+        .nav-btn.active {
+            background: black;
+            color: white;
+            transform: scale(1.05)
+        }
+
+        .label {
+            font-size: 10px;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            font-weight: 700
+        }
+
+        .stat {
+            font-size: 34px;
+            font-weight: 800;
+            margin-top: 4px
+        }
+
+        .anim-line {
+            height: 3px;
+            width: 0%;
+            background: black;
+            border-radius: 10px;
+            margin-top: 10px;
+            animation: grow 1s forwards 0.5s
+        }
+
+        .anim-line.violet {
+            background: #8b5cf6
+        }
+
+        .mini-glass {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 14px;
+            padding: 12px
+        }
+
+        .badge-count {
+            background: black;
+            color: white;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 10px;
+            margin-left: 6px
+        }
+
+        .mesh-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: 0.6;
+            animation: float 12s infinite ease-in-out
+        }
+
+        .b1 {
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, #ddd6fe, #f5d0fe);
+            top: -120px;
+            left: -100px;
+        }
+
+        .b2 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #a5f3fc, #c4b5fd);
+            top: 30%;
+            right: -100px;
+        }
+
+        .b3 {
+            width: 700px;
+            height: 700px;
+            background: linear-gradient(135deg, #fde68a, #fca5a5);
+            bottom: -200px;
+            left: 25%;
+        }
+
+        .b4 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #bbf7d0, #a5f3fc);
+            top: 60%;
+            left: 10%;
+        }
+
+        .hover-tip {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(12px) scale(0.95);
+            transition: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(16px);
+            color: white;
+            padding: 16px 18px;
+            border-radius: 18px;
+            font-size: 12px;
+            max-width: 320px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3)
+        }
+
+        .hover-tip.show {
+            opacity: 1;
+            transform: translateY(0) scale(1)
+        }
+
+        .event-card {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1)
+        }
+
+        .event-card:hover {
+            transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+            box-shadow: 0 20px 50px rgba(120, 80, 200, 0.18)
+        }
+
+        .reveal {
+            animation: reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both
+        }
+
+        .d1 {
+            animation-delay: 0.1s
+        }
+
+        .d2 {
+            animation-delay: 0.2s
+        }
+
+        .d3 {
+            animation-delay: 0.3s
+        }
+
+        @keyframes reveal {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
+
+        @keyframes grow {
+            to {
+                width: 60%
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1)
+            }
+
+            33% {
+                transform: translate(30px, -30px) scale(1.05)
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.95)
+            }
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.96)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1)
+            }
+        }
+
+        .animate-pop {
+            animation: pop 0.5s cubic-bezier(0.16, 1, 0.3, 1)
+        }
+
+        .logo-anim {
+            animation: spin 8s linear infinite
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0)
+            }
+
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .progress {
+            height: 5px;
+            background: rgba(0, 0, 0, 0.07);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative
+        }
+
+        .progress>div {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #c084fc);
+            transition: 1s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative
+        }
+
+        /* --- RESPONSIVE FIXES ADDED --- */
+        @media (max-width: 768px) {
+            .stat {
+                font-size: 24px
+            }
+
+            .glass-stat {
+                padding: 14px;
+                border-radius: 16px
+            }
+
+            header .max-w-\[1320px\] {
+                height: auto !important;
+                min-height: 64px;
+                padding: 12px 16px;
+                gap: 12px;
+                flex-wrap: wrap
+            }
+
+            .nav-btn {
+                padding: 8px 14px;
+                font-size: 11px
+            }
+
+            #grid,
+            #myGrid {
+                grid-template-columns: 1fr !important
+            }
+
+            .glass-card.rounded-\[20px\] {
+                border-radius: 16px !important
+            }
+
+            .hover-tip {
+                max-width: 85vw;
+                left: 5vw !important;
+                right: 5vw !important
+            }
+        }
+
+        @media (max-width: 640px) {
+            main {
+                padding-left: 16px;
+                padding-right: 16px;
+                padding-top: 16px
+            }
+
+            .grid.grid-cols-12 {
+                gap: 12px
+            }
+
+            .glass-stat.dark h2 {
+                font-size: 26px
+            }
+
+            .glass-card.p-3 {
+                flex-direction: column
+            }
+
+            #catFilter,
+            #dateFilter {
+                width: 100%
+            }
+
+            .flex.gap-2 {
+                flex-wrap: wrap
+            }
+
+            .flex.gap-2>* {
+                flex: 1 1 100%
+            }
+
+            .flex.gap-2 select,
+            .flex.gap-2 input {
+                flex: 1 1 calc(50% - 4px)
+            }
+        }
+
+        /* Ensure event cards inner content is responsive */
+        #grid>div,
+        #myGrid>div {
+            min-width: 0
+        }
+    </style>
+</head>
+
+<body>
+    <div id="hoverTip" class="hover-tip"></div>
+
+    <div class="mesh-bg">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="blob b4"></div>
+    </div>
+
+    <header class="sticky top-0 z-40 glass-nav">
+        <div
+            class="max-w-[1320px] mx-auto px-4 sm:px-5 h-auto min-h-[72px] py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div
+                    class="logo-anim w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black text-white grid place-items-center font-black text-sm">
+                    N</div>
+                <div>
+                    <h1 class="font-black text-[16px] sm:text-[18px] tracking-[-0.5px]" style="font-family:Syne">
+                        Nova.Events</h1>
+                    <p class="text-[10px] sm:text-[11px] opacity-60">Glassy • Animated • Hover Tracked</p>
+                </div>
+            </div>
+            <div class="flex gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                <button onclick="setView('explore')" id="vExplore" class="nav-btn active flex-1 sm:flex-none">Explore
+                    Events</button>
+                <button onclick="setView('my')" id="vMy" class="nav-btn flex-1 sm:flex-none">My Registrations <span
+                        id="myBadge" class="badge-count">0</span></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1320px] mx-auto px-4 sm:px-5 py-4 sm:py-7 relative z-10 space-y-4 sm:space-y-6">
+        <div class="grid grid-cols-12 gap-3 sm:gap-4">
+            <div class="col-span-12 lg:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="glass-stat reveal">
+                    <p class="label">TOTAL EVENTS</p>
+                    <h2 id="statTotal" class="stat">0</h2>
+                    <div class="anim-line"></div>
+                </div>
+                <div class="glass-stat reveal d1">
+                    <p class="label text-violet-600">LIVE REGISTRATIONS</p>
+                    <h2 id="statRegs" class="stat">0</h2>
+                    <div class="anim-line violet"></div>
+                </div>
+                <div class="glass-stat reveal d2">
+                    <p class="label">MY EVENTS</p>
+                    <h2 id="statMy" class="stat">0</h2>
+                    <div class="anim-line"></div>
+                </div>
+                <div class="glass-stat dark reveal d3">
+                    <p class="label opacity-60">FULL EVENTS</p>
+                    <h2 id="statFull" class="stat text-white">0</h2>
+                    <p class="text-[10px] opacity-60 mt-1">Capacity reached</p>
+                </div>
+            </div>
+            <div class="col-span-12 lg:col-span-4 glass-card rounded-[22px] p-4 sm:p-5 reveal d2">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <h3 class="font-bold text-[12px] sm:text-[13px]">🖱️ Hover Intelligence</h3><span
+                        class="text-[9px] sm:text-[10px] bg-black text-white px-2 py-0.5 rounded-full animate-pulse">LIVE
+                        TRACKING</span>
+                </div>
+                <p class="text-[11px] opacity-60 mt-1">Move cursor over event cards → glassy glow + 3D tilt + analytics.
+                </p>
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                    <div class="mini-glass">
+                        <p class="text-[10px] opacity-60">MOST HOVERED</p>
+                        <p id="mostHover" class="font-bold text-[12px] mt-1">--</p>
+                    </div>
+                    <div class="mini-glass">
+                        <p class="text-[10px] opacity-60">TOTAL HOVERS</p>
+                        <p id="totalHover" class="font-bold text-[12px] mt-1">0</p>
+                    </div>
+                </div>
+                <div id="liveHover" class="mt-3 text-[11px] opacity-60 space-y-1"></div>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-[16px] sm:rounded-[20px] p-3 flex flex-col lg:flex-row gap-3 reveal">
+            <div class="flex-1 relative group"><span
+                    class="absolute left-4 top-[12px] group-focus-within:scale-125 transition">⌕</span><input
+                    id="search" placeholder="Search by name, venue, description..."
+                    class="w-full pl-10 pr-4 py-3 bg-white/60 border border-white/50 rounded-full text-[13px] outline-none focus:bg-white focus:border-violet-300 transition">
+            </div>
+            <div class="flex gap-2 flex-wrap">
+                <select id="catFilter"
+                    class="flex-1 sm:flex-none px-4 py-3 bg-white/60 border border-white/50 rounded-full text-[12px]">
+                    <option value="">All Categories</option>
+                    <option>Technical</option>
+                    <option>Cultural</option>
+                    <option>Sports</option>
+                    <option>Workshop</option>
+                    <option>Seminar</option>
+                </select>
+                <input id="dateFilter" type="date"
+                    class="flex-1 sm:flex-none px-4 py-3 bg-white/60 border border-white/50 rounded-full text-[12px]">
+                <button onclick="clearFilters()"
+                    class="w-full sm:w-auto px-5 py-3 bg-black text-white rounded-full text-[12px] font-bold hover:scale-105 transition">Clear</button>
+            </div>
+        </div>
+
+        <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
+        <div id="empty" class="hidden glass-card rounded-[20px] p-10 sm:p-16 text-center reveal">No events found</div>
+
+        <div id="myView" class="hidden space-y-4">
+            <div
+                class="glass-card rounded-[20px] p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <h2 class="font-black text-[18px] sm:text-[20px]" style="font-family:Syne">My Registered Events</h2>
+                <span class="text-[11px] sm:text-[12px] opacity-60">Cancel where allowed • Hover to preview</span>
+            </div>
+            <div id="myGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
+        </div>
+    </main>
+
+    <div id="detail" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/10 backdrop-blur-xl" onclick="closeDetail()"></div>
+        <div
+            class="relative max-w-[600px] w-[95%] mx-auto mt-[3vh] glass-modal rounded-[20px] sm:rounded-[30px] m-4 overflow-hidden max-h-[92vh] flex flex-col animate-pop">
+            <div id="detailBody" class="p-5 sm:p-7 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script src="TN.js"></script>
+</body>
+
+</html>
